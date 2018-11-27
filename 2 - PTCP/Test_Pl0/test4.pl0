@@ -1,0 +1,38 @@
+Program Example4;
+Const d = 11, e=12;
+Var i,a,b,c, f[10];
+
+
+Procedure gcd(a; b; var d);  
+	var i;
+	Begin
+	   while a <> b do
+            begin
+                if a < b then
+                    begin
+                        b := b-a;
+                    end
+                else
+                    begin
+                        a := a-b;
+                    end;
+            end;
+        d := b;
+	End;
+
+Procedure ppp(var x);
+Begin
+	call readln(x);
+End;
+
+Begin
+    f[2] := 3;
+	a := 100;
+    b := 74;
+    call gcd(a+12, b, c);
+    call writeln(a);
+    call writeln(b);
+    call writeln(c);
+    call ppp(f[2]);
+    call writeln(f[2]);
+End.

@@ -1,0 +1,39 @@
+Program test1;
+var i, x, a, b, c;
+
+Procedure f1(a);
+Const c1=4;
+	Procedure f2;
+	var b;
+	begin
+	    a := c1 + 1;
+	End;
+begin
+	a := c1 + 1;
+        call F2(a);
+End;
+
+
+
+begin
+    call F1(a);
+
+    while a <> b do
+            begin
+                if a < b then
+                    begin
+                        b := b-a;
+                    end
+                else
+                    begin
+                        a := a-b;
+                    end;
+            end;
+    c := b;
+end.
+
+
+
+
+
+

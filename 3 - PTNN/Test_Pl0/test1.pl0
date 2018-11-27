@@ -1,0 +1,25 @@
+Program test1;
+var i, x, a, b, c;
+begin
+    call readln(a); 
+    call readln(b);
+    while a <> b do
+            begin
+                if a < b then
+                    begin
+                        b := b-a;
+                    end
+                else
+                    begin
+                        a := a-b;
+                    end;
+            end;
+        c := b;
+        call writeln(c);
+end.
+
+
+
+
+
+
