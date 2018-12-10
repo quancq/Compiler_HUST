@@ -12,13 +12,14 @@ symNode* createNode(){
 
 symTab* createTab(){
 	symTab* tab = (symTab*) malloc(sizeof(symTab));
-	tab->next = NULL;
 	tab->parentTab = NULL;
+	tab->top = NULL;
+	tab->size = 0;
 	return tab;
 }
 
 void freeTab(symTab* table){
-	symNode* node = table->next;
+	symNode* node = table->top;
 	while(node != NULL){
 		symNode* next = node->next;
 		free(node);
@@ -29,7 +30,7 @@ void freeTab(symTab* table){
 }
 
 void freeStack(symStack* stack){
-	symTab* table = stack->parentTab;
+	symTab* table = stack->top;
 	while(table != NULL){
 		symTab* parentTab = table->parentTab;
 		free(table);
@@ -38,28 +39,34 @@ void freeStack(symStack* stack){
 }
 
 // Thêm danh biểu vào bảng kí hiệu
-void pushNode(symTab* table, char* name, VarType type){
-	symNode* top = table->next;
+symNode* pushNode(symTab* table, char* name, VarKind kind, int size){
+	symNode* top = table->top;
 	symNode* newNode = createNode();
 
 	strcpy(newNode->name, name);
-	newNode->type = type;
+	newNode->kind = kind;
+	newNode->size = size;
+	newNode->offset = table->size;
 	newNode->next = top;
 
-	table->next = newNode;
+	table->top = newNode;
+	table->size = table->size + size;
+
+	return newNode;
 }
 
 // Thêm bảng kí hiệu vào đỉnh stack
 void pushTab(symStack* stack, symTab* table){
-	symTab* top = stack->parentTab;
-	stack->parentTab = table;
+	symTab* top = stack->top;
+	stack->top = table;
 	table->parentTab = top;
 }
 
 symTab* popTab(symStack* stack){
-	symTab* tab = stack->parentTab;
+	symTab* tab = stack->top;
 	if(tab != NULL){
-		stack->parentTab = tab->parentTab;
+		stack->top = tab->parentTab;
+		freeTab(tab);
 	}
 
 	return tab;
@@ -68,9 +75,9 @@ symTab* popTab(symStack* stack){
 void printTab(symTab* table){
 	printf("\nPrint current table\n");
 	if(table != NULL){
-		symNode* node = table->next;
+		symNode* node = table->top;
 		while(node != NULL){
-			printf("(%s-%d)\t", node->name, node->type);
+			printf("(%s-%d)\t", node->name, node->kind);
 			node = node->next;
 		}
 	}
@@ -79,7 +86,7 @@ void printTab(symTab* table){
 // Tìm node theo tên trong bảng kí hiệu tương ứng phạm vi hiện tại
 symNode* getNodeCurrScope(symTab* table, char* name){
 	// printTab(table);
-	symNode* node = table->next;
+	symNode* node = table->top;
 	while(node != NULL){
 		if(strcmp(node->name, name) == 0){
 			break;
@@ -94,7 +101,7 @@ symNode* getNodeAllScope(symTab* table, char* name){
 	symNode* node = NULL;
 	while(table != NULL){
 		// printTab(table);
-		node = table->next;				// Node trên đỉnh của bảng kí hiệu hiện tại
+		node = table->top;				// Node trên đỉnh của bảng kí hiệu hiện tại
 
 		while(node != NULL){
 			if(strcmp(node->name, name) == 0){

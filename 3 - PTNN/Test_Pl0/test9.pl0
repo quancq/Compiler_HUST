@@ -1,22 +1,40 @@
 Program test1;
-var i, x, a, b, c;
+var i, x, a, b, c, arr0[2];
 
 Procedure f1(a);
 Const c1=4;
+var arr1[3];
 	Procedure f2;
-	var b;
+	var b, i, min, max;
 	begin
-	    a := c1 + 1;
+                call F1(a);
+
+		a := - arr1[0] + 3 * (a + arr1[1]);
+		if ODD arr1[c1]
+		then a := 2;
+
+		if arr1[0] > arr1[1]
+		then arr1[0] := arr1[3];			
+
+		for i := arr1[2] to max do
+		begin
+			a := 1;
+		end		
 	End;
 begin
 	a := c1 + 1;
-        call F2(a);
+        call F2;
 End;
 
-
+Procedure f3(arr0;b; var c1);
+var arr2[5], d;
+begin
+	arr2[3] := d / c1 + arr2[0];
+end;
 
 begin
     call F1(a);
+    call F3(arr0, b, b);
 
     while a <> b do
             begin
