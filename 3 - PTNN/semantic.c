@@ -10,8 +10,9 @@ symNode* createNode(){
 	return node;
 }
 
-symTab* createTab(){
+symTab* createTab(char* name){
 	symTab* tab = (symTab*) malloc(sizeof(symTab));
+	strcpy(tab->name, name);
 	tab->parentTab = NULL;
 	tab->top = NULL;
 	tab->size = 0;
@@ -55,6 +56,22 @@ symNode* pushNode(symTab* table, char* name, VarKind kind, int size){
 	return newNode;
 }
 
+// symNode* pushNodeProc(symTab* table, char* name, symTab* childTab){
+// 	symNode* top = table->top;
+// 	symNode* newNode = createNode();
+
+// 	strcpy(newNode->name, name);
+// 	newNode->kind = SUBPROC;
+// 	newNode->size = 0;
+// 	newNode->offset = table->size;
+// 	newNode->next = top;
+// 	newNode->subProc = childTab;
+
+// 	table->top = newNode;
+
+// 	return newNode
+// }
+
 // Thêm bảng kí hiệu vào đỉnh stack
 void pushTab(symStack* stack, symTab* table){
 	symTab* top = stack->top;
@@ -66,7 +83,7 @@ symTab* popTab(symStack* stack){
 	symTab* tab = stack->top;
 	if(tab != NULL){
 		stack->top = tab->parentTab;
-		freeTab(tab);
+		// freeTab(tab);
 	}
 
 	return tab;

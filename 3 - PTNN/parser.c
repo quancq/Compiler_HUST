@@ -619,8 +619,10 @@ void block(symTab* table){
 			}
 
 			// Tạo bảng kí hiệu tương ứng phạm vi mới
-			symTab* newTab = createTab();
+			symTab* newTab = createTab(Id);
 			pushTab(&stack, newTab);
+			nodeProc->subProc = newTab;
+			// printf("\nThêm subProc %s vào bảng %s \n", Id, table->name);
 
 			Token = getToken();
 			int num_args = 0;
@@ -720,11 +722,11 @@ void program(){
 		Token = getToken();
 		if(Token == IDENT){
 			// Tạo bảng kí hiệu mới
-			symTab* firstTab = createTab();
+			symTab* firstTab = createTab(Id);
 			pushTab(&stack, firstTab);
 
 			// Thêm ident vào bảng
-			pushNode(firstTab, Id, PROG, -1);
+			pushNode(firstTab, Id, PROG, 0);
 
 			Token = getToken();
 			if(Token == SEMICOLON){
