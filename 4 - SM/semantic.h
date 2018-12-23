@@ -18,6 +18,7 @@ typedef struct node {
 	VarType type;
 	char name[MAX_IDENT_LEN + 1];
 	int offset;
+	int offsetOnBoard;
 	int size;
 	int num_args;
 	VarType arguments[MAX_ARGUMENTS];
@@ -47,3 +48,4 @@ void pushTab(symStack* stack, symTab* table);
 symTab* popTab(symStack* stack);
 symNode* getNodeCurrScope(symTab* table, char* name);
 symNode* getNodeAllScope(symTab* table, char* name);
+int getScopeDepth(symTab* table, char* name);

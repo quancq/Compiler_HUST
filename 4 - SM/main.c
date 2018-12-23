@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "scanner.h"
 #include "parser.h"
+#include "code_generator.h"
 
 FILE *f;
 TokenType Token;
@@ -13,8 +14,8 @@ VarType declareType, passType;
 int declareNumArgs, passNumArgs;
 
 char ch = ' ';
-int	      Num;		//Từ vựng khi Token là NUMBER
-char  Id[MAX_IDENT_LEN + 1]; //Từ vựng khi Token là IDENT
+int Num;		//Từ vựng khi Token là NUMBER
+char Id[MAX_IDENT_LEN + 1]; //Từ vựng khi Token là IDENT
 
 char Token_Tab[][15] = {
 	"NONE", "IDENT", "NUMBER",
@@ -23,6 +24,9 @@ char Token_Tab[][15] = {
 	"PLUS", "MINUS", "TIMES", "SLASH", "EQU", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "LPARENT", 
 	"RPARENT", "LBRACK", "RBRACK", "PERIOD", "COMMA", "SEMICOLON",  "ASSIGN", "PERCENT"
 };
+
+Instruction code[MAX_CODE_LEN];
+int codeLen = 0;
 
 int main(int argc, char *argv[]){
 	char* file_path = "./test.pl0";

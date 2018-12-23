@@ -130,3 +130,23 @@ symNode* getNodeAllScope(symTab* table, char* name){
 	}
 	return NULL;
 }
+
+int getScopeDepth(symTab* table, char* name){
+	symNode* node = NULL;
+	int depth = 0;
+	while(table != NULL){
+		// printTab(table);
+		node = table->top;				// Node trên đỉnh của bảng kí hiệu hiện tại
+
+		while(node != NULL){
+			if(strcmp(node->name, name) == 0){
+				return depth;
+			}
+			node = node->next;
+		}
+
+		table = table->parentTab;		// Tìm trong bảng kí hiệu của phạm vi bên ngoài tiếp theo
+		++depth;
+	}
+	return -1;
+}

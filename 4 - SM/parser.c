@@ -3,6 +3,7 @@
 #include <string.h>
 #include "scanner.h"
 #include "parser.h"
+#include "code_generator.h"
 
 extern symStack stack;
 extern TokenType Token;
@@ -12,6 +13,8 @@ extern int declareNumArgs, passNumArgs;
 extern int Num;
 extern char Id[11];
 extern char Token_Tab[][15];
+extern Instruction code[MAX_CODE_LEN];
+extern int codeLen;
 
 char* getTypeStr(int type){
 	if(type == INTEGER){
@@ -152,6 +155,12 @@ VarType term(symTab* table){
 			Token = archiveToken;
 			error(31);
 		}
+		if(archiveToken == TIMES){
+			genCode(OP_MUL, 0, 0);
+		}
+		else if(archiveToken == SLASH){
+			genCode(OP_DIV, 0, 0);
+		}
 	}
 
 	return type;
@@ -170,6 +179,9 @@ VarType expression(symTab* table){
 			Token = archiveToken;
 			error(31);
 		}
+		if(archiveToken == MINUS){
+			genCode(OP_NEG, 0, 0);
+		}
 	}
 
 	if(Token == PLUS || Token == MINUS){
@@ -186,6 +198,13 @@ VarType expression(symTab* table){
 			Token = archiveToken;
 			error(31);
 		}
+		if(archiveToken == PLUS){
+			genCode(OP_ADD, 0, 0);
+		}
+		else{
+			genCode(OP_SUB, 0, 0);
+		}
+		
 	}
 
 	return type;
@@ -242,10 +261,12 @@ VarType factor(symTab* table){
 		strcpy(copyId, Id);
 
 		Token = getToken();
+		int p = getScopeDepth(table, Id);
 		if(Token == LBRACK){
 			if(node->type != ARRAY){
 				error(27);
 			}
+			genCode(OP_LA, p, node->offsetOnBoard);
 
 			Token = getToken();
 			type = expression(table);
@@ -256,6 +277,9 @@ VarType factor(symTab* table){
 			if(Token == RBRACK){
 				Token = getToken();
 				type = INTEGER;
+
+				genCode(OP_ADD, 0, 0);
+				genCode(OP_LI, 0, 0);
 			}
 			else{
 				error(2);
@@ -263,11 +287,18 @@ VarType factor(symTab* table){
 		}
 		else{
 			type = node->type;
-
+			
+			if(node->kind == VARIABLE){
+				genCode(OP_LV, p, node->offsetOnBoard);
+			}
+			else if(node->kind == REFERENCE){
+				genCode(OP_LA, p, node->offsetOnBoard);
+			}
 		}
 		
 	}
 	else if(Token == NUMBER){
+		genCode(OP_LC, 0, Num);
 		Token = getToken();
 		type = INTEGER;
 	}
@@ -298,6 +329,10 @@ void statement(symTab* table){
 		char* copyId = (char*)malloc(MAX_IDENT_LEN);
 		strcpy(copyId, Id);
 
+		// Load address of ident
+		int p = getScopeDepth(table, Id);
+		genCode(OP_LA, p, node->offsetOnBoard);
+
 		Token = getToken();
 		int has_brack = 0;
 		if(Token == LBRACK){
@@ -318,6 +353,9 @@ void statement(symTab* table){
 			else{
 				error(2);
 			}
+
+			// Add index of array to pointer (arr[i] -> arr + i)
+			genCode(OP_ADD, 0, 0);
 		}
 		
 		if(Token == ASSIGN){
@@ -340,6 +378,7 @@ void statement(symTab* table){
 				Token = ASSIGN;
 				error(31);
 			}
+			genCode(OP_ST, 0, 0);
 
 		}else{
 			error(5);
@@ -624,22 +663,18 @@ void block(symTab* table){
 			if(Token == LPARENT){
 				Token = getToken();
 				while(1){
-					VarKind kind = REFERENCE;
+					VarKind kind = VARIABLE;
 					if(Token == VAR){
 						Token = getToken();
-						kind = VARIABLE;
+						kind = REFERENCE;
 					}
 
 					if(Token == IDENT){
 						// Nếu Ident là tham chiếu thì tìm xem Ident đã khai báo chưa
 						if(kind == REFERENCE){
-							symNode* node = getNodeAllScope(table, Id);
-							if(node == NULL){
-								error(25);
-							}
-							symNode* newNode =  pushNode(newTab, Id, REFERENCE, node->size);
-							newNode->type = node->type;
-							nodeProc->arguments[num_args] = node->type;
+							symNode* newNode =  pushNode(newTab, Id, REFERENCE, INT_SIZE);
+							newNode->type = INTEGER;
+							nodeProc->arguments[num_args] = INTEGER;
 						}
 						else {
 						// Nếu Ident là tham trị thì thêm Ident vào bảng kí hiệu mới		
