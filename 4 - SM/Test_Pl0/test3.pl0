@@ -1,0 +1,14 @@
+Program test3;
+
+Var a2, b, i;
+
+Begin
+b := 11;
+if a2 <= 25 then
+	a2 := 25 else b := b;
+
+for i := 1 to (26 * 7) do b := b+2;
+	
+
+
+End.

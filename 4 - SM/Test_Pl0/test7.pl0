@@ -1,0 +1,5 @@
+program test;
+var a;
+begin
+    while 1>2 do a := 1;
+end.

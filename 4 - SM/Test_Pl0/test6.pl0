@@ -1,0 +1,14 @@
+program test;
+var a[2], b;
+begin
+    if 1<2 then b := 1 ;
+end.
+
+0 LC 1
+1 LC 2
+2 LT
+3 FJ 7
+4 LA 0 4
+5 LC 1
+6 ST
+7 HLT
