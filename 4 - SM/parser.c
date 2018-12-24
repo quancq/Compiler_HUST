@@ -673,6 +673,7 @@ void block(symTab* table){
 	}
 	if(Token == VAR){
 		Token = getToken();
+		int totalVarSize = 0;
 		while(1){
 			if(Token == IDENT){
 				// Kiểm tra khai báo Ident có hợp lệ không
@@ -694,7 +695,8 @@ void block(symTab* table){
 							node->size = Num * INT_SIZE;
 							node->arrLen = Num;
 							node->type = ARRAY;
-							genCode(OP_INT, 0, Num*INT_SIZE);
+							// genCode(OP_INT, 0, Num*INT_SIZE);
+							totalVarSize += Num * INT_SIZE;
 						}
 						else{
 							error(2);
@@ -707,7 +709,8 @@ void block(symTab* table){
 				else{
 					node->size = INT_SIZE;
 					node->type = INTEGER;
-					genCode(OP_INT, 0, INT_SIZE);
+					// genCode(OP_INT, 0, INT_SIZE);
+					totalVarSize += INT_SIZE;
 				}
 
 				if(Token == COMMA){
@@ -724,6 +727,9 @@ void block(symTab* table){
 			else{
 				error(14);
 			}
+		}
+		if(totalVarSize > 0){
+			genCode(OP_INT, 0, totalVarSize);
 		}
 	}
 	
@@ -841,8 +847,12 @@ void block(symTab* table){
 // Phân tích chương trình
 void program(){
 	if(Token == PROGRAM){
+
 		Token = getToken();
 		if(Token == IDENT){
+			genCode(OP_J, 0, 1);
+			genCode(OP_INT, 0, 4);
+
 			// Tạo bảng kí hiệu mới
 			symTab* firstTab = createTab(Id);
 			pushTab(&stack, firstTab);

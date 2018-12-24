@@ -25,94 +25,94 @@ void printCode(){
 		int q = code[i].q;
 		switch(op){
 			case OP_LA:
-				printf("\nLA %d, %d", p, q);
+				printf("\n%4d. LA %d, %d", i, p, q);
 				break;
 			case OP_LV:
-				printf("\nLV %d, %d", p, q);
+				printf("\n%4d. LV %d, %d", i, p, q);
 				break;
 			case OP_LC:
-				printf("\nLC %d", q);
+				printf("\n%4d. LC %d", i, q);
 				break;
 			case OP_LI:
-				printf("\nLI");
+				printf("\n%4d. LI", i);
 				break;
 			case OP_INT:
-				printf("\nINT %d", q);
+				printf("\n%4d. INT %d", i, q);
 				break;
 			case OP_DCT:
-				printf("\nDCT %d", q);
+				printf("\n%4d. DCT %d", i, q);
 				break;
 			case OP_J:
-				printf("\nJ %d", q);
+				printf("\n%4d. J %d", i, q);
 				break;
 			case OP_FJ:
-				printf("\nFJ %d", q);
+				printf("\n%4d. FJ %d", i, q);
 				break;
 			case OP_HLT:
-				printf("\nHLT");
+				printf("\n%4d. HLT", i);
 				break;
 			case OP_ST:
-				printf("\nST");
+				printf("\n%4d. ST", i);
 				break;
 			case OP_CALL:
-				printf("\nCALL %d, %d", p, q);
+				printf("\n%4d. CALL %d, %d", i, p, q);
 				break;
 			case OP_EP:
-				printf("\nEP");
+				printf("\n%4d. EP", i);
 				break;
 			case OP_EF:
-				printf("\nEF");
+				printf("\n%4d. EF", i);
 				break;
 			case OP_RC:
-				printf("\nRC");
+				printf("\n%4d. RC", i);
 				break;
 			case OP_RI:
-				printf("\nRI");
+				printf("\n%4d. RI", i);
 				break;
 			case OP_WRC:
-				printf("\nWRC");
+				printf("\n%4d. WRC", i);
 				break;
 			case OP_WRI:
-				printf("\nWRI");
+				printf("\n%4d. WRI", i);
 				break;
 			case OP_WLN:
-				printf("\nWLN");
+				printf("\n%4d. WLN", i);
 				break;
 			case OP_ADD:
-				printf("\nADD");
+				printf("\n%4d. ADD", i);
 				break;
 			case OP_SUB:
-				printf("\nSUB");
+				printf("\n%4d. SUB", i);
 				break;
 			case OP_MUL:
-				printf("\nMUL");
+				printf("\n%4d. MUL", i);
 				break;
 			case OP_DIV:
-				printf("\nDIV");
+				printf("\n%4d. DIV", i);
 				break;
 			case OP_NEG:
-				printf("\nNEG");
+				printf("\n%4d. NEG", i);
 				break;
 			case OP_CV:
-				printf("\nCV");
+				printf("\n%4d. CV", i);
 				break;
 			case OP_EQ:
-				printf("\nEQ");
+				printf("\n%4d. EQ", i);
 				break;
 			case OP_NE:
-				printf("\nNE");
+				printf("\n%4d. NE", i);
 				break;
 			case OP_GT:
-				printf("\nGT");
+				printf("\n%4d. GT", i);
 				break;
 			case OP_LT:
-				printf("\nLT");
+				printf("\n%4d. LT", i);
 				break;
 			case OP_GE:
-				printf("\nGE");
+				printf("\n%4d. GE", i);
 				break;
 			case OP_LE:
-				printf("\nLE");
+				printf("\n%4d. LE", i);
 				break;
 		}
 	}

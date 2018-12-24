@@ -14,7 +14,7 @@ symTab* createTab(char* name){
 	strcpy(tab->name, name);
 	tab->parentTab = NULL;
 	tab->top = NULL;
-	tab->size = 0;
+	tab->size = 4;
 	return tab;
 }
 
