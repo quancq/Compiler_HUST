@@ -1,5 +1,5 @@
 #define MAX_IDENT_LEN 10
-#define INT_SIZE 2
+#define INT_SIZE 1
 #define MAX_ARGUMENTS 10
 
 typedef enum {
@@ -18,7 +18,8 @@ typedef struct node {
 	VarType type;
 	char name[MAX_IDENT_LEN + 1];
 	int offset;
-	int offsetOnBoard;
+	// int offsetOnBoard;
+	int arrLen;
 	int size;
 	int num_args;
 	VarType arguments[MAX_ARGUMENTS];

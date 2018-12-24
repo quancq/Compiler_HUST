@@ -7,7 +7,6 @@
 
 extern symStack stack;
 extern TokenType Token;
-extern symStack stack;
 extern VarType declareType, passType;
 extern int declareNumArgs, passNumArgs;
 extern int Num;
@@ -15,6 +14,13 @@ extern char Id[11];
 extern char Token_Tab[][15];
 extern Instruction code[MAX_CODE_LEN];
 extern int codeLen;
+
+void copyArray(VarType* src, VarType* dst, int numElmss){
+	int i;
+	for(i = 0; i < numElmss; ++i){
+		dst[i] = src[i];
+	}
+}
 
 char* getTypeStr(int type){
 	if(type == INTEGER){
@@ -221,11 +227,20 @@ VarType condition(symTab* table){
 			Token = ODD;
 			error(31);
 		}
+
+		// Kiểm tra gía trị trên đỉnh stack là lẻ hay chẵn
+		// Nếu lẻ thì ghi gía trị 1 vào đỉnh stack
+		genCode(OP_CV, 0, 0);
+		genCode(OP_LC, 0, 2);
+		genCode(OP_DIV, 0, 0);
+		genCode(OP_LC, 0, 2);
+		genCode(OP_MUL, 0, 0);
+		genCode(OP_NE, 0, 0);
 	}
 	else{
 		type = expression(table);
 		if (Token == EQU || Token == NEQ || Token == LSS ||
-			Token == LEQ || Token == GTR || Token == GEQ){
+			Token == LEQ || Token == GRT || Token == GEQ){
 
 			if(type != INTEGER){
 				error(30);
@@ -239,6 +254,28 @@ VarType condition(symTab* table){
 				Token = archiveToken;
 				error(31);
 			}
+
+			switch(archiveToken){
+	            case EQU:
+	                genCode(OP_EQ, 0, 0);
+	                break;
+	            case NEQ:
+	                genCode(OP_NE, 0, 0);
+	                break;
+	            case LSS:
+	                genCode(OP_LT, 0, 0);
+	                break;
+	            case LEQ:
+	                genCode(OP_LE, 0, 0);
+	                break;
+	            case GRT:
+	                genCode(OP_GT, 0, 0);
+	                break;
+	            case GEQ:
+	                genCode(OP_GE, 0, 0);
+	                break;
+	        }
+
 		}
 		else{
 			error(1);
@@ -259,14 +296,14 @@ VarType factor(symTab* table){
 
 		char* copyId = (char*)malloc(MAX_IDENT_LEN);
 		strcpy(copyId, Id);
-
-		Token = getToken();
 		int p = getScopeDepth(table, Id);
+		Token = getToken();
+		
 		if(Token == LBRACK){
 			if(node->type != ARRAY){
 				error(27);
 			}
-			genCode(OP_LA, p, node->offsetOnBoard);
+			genCode(OP_LA, p, node->offset);
 
 			Token = getToken();
 			type = expression(table);
@@ -289,10 +326,10 @@ VarType factor(symTab* table){
 			type = node->type;
 			
 			if(node->kind == VARIABLE){
-				genCode(OP_LV, p, node->offsetOnBoard);
+				genCode(OP_LV, p, node->offset);
 			}
 			else if(node->kind == REFERENCE){
-				genCode(OP_LA, p, node->offsetOnBoard);
+				genCode(OP_LA, p, node->offset);
 			}
 		}
 		
@@ -331,7 +368,7 @@ void statement(symTab* table){
 
 		// Load address of ident
 		int p = getScopeDepth(table, Id);
-		genCode(OP_LA, p, node->offsetOnBoard);
+		genCode(OP_LA, p, node->offset);
 
 		Token = getToken();
 		int has_brack = 0;
@@ -395,9 +432,12 @@ void statement(symTab* table){
 			if(node->kind != SUBPROC){
 				error(26);
 			}
+			int p = getScopeDepth(table, Id);
 			declareNumArgs = node->num_args;
 			passNumArgs = 0;
 			VarType* arguments = node->arguments;
+
+			genCode(OP_INT, 0, 4);
 
 			Token = getToken();
 			if(Token == LPARENT){
@@ -447,6 +487,8 @@ void statement(symTab* table){
 					error(34);
 				}
 			}
+			genCode(OP_DCT, 0, 4 + INT_SIZE * (passNumArgs));
+			genCode(OP_CALL, p, node->offset);
 		}
 		else{
 			error(6);
@@ -469,12 +511,25 @@ void statement(symTab* table){
 	else if(Token == IF){
 		Token = getToken();
 		condition(table);
+
+		int l1 = codeLen;
+		genCode(OP_FJ, 0, 0);
+
 		if(Token == THEN){
 			Token = getToken();
 			statement(table);
+
+			code[l1].q = codeLen;
+
 			if(Token == ELSE){
+				code[l1].q = code[l1].q + 1;
+				int l2 = codeLen;
+				genCode(OP_J, 0, 0);
+
 				Token = getToken();
 				statement(table);
+
+				code[l2].q = codeLen;
 			}
 		}
 		else{
@@ -483,10 +538,15 @@ void statement(symTab* table){
 	}
 	else if(Token == WHILE){
 		Token = getToken();
+		int l1 = codeLen;
 		condition(table);
 		if(Token == DO){
+			int l2 = codeLen;
+			genCode(OP_FJ, 0, 0);
 			Token = getToken();
 			statement(table);
+			genCode(OP_J, 0, l1);
+			code[l2].q = codeLen;
 		}
 		else{
 			error(9);
@@ -498,7 +558,11 @@ void statement(symTab* table){
 			symNode* node = getNodeAllScope(table, Id);
 			if(node == NULL){
 				error(25);
-			}			
+			}
+			int p = getScopeDepth(table, Id);
+			genCode(OP_LA, p, node->offset);
+			genCode(OP_CV, 0, 0);
+
 			Token = getToken();
 			if(Token == ASSIGN){
 				if(node->type != INTEGER){
@@ -511,17 +575,36 @@ void statement(symTab* table){
 					Token = ASSIGN;
 					error(31);
 				}
+				genCode(OP_ST, 0, 0);
 
 				if(Token == TO){
+					int l1 = codeLen;
+					genCode(OP_CV, 0, 0);
+					genCode(OP_LI, 0, 0);
+
 					Token = getToken();
 					VarType type = expression(table);
 					if(type != INTEGER){
 						Token = TO;
 						error(31);
 					}
+					genCode(OP_LE, 0, 0);
+					int l2 = codeLen;
+					genCode(OP_FJ, 0, 0);
+
 					if(Token == DO){
 						Token = getToken();
 						statement(table);
+
+						genCode(OP_CV, 0, 0);
+						genCode(OP_CV, 0, 0);
+						genCode(OP_LI, 0, 0);
+						genCode(OP_LC, 0, 1);
+						genCode(OP_ADD, 0, 0);
+						genCode(OP_ST, 0, 0);
+						genCode(OP_J, 0, l1);
+						code[l2].q = codeLen;
+						genCode(OP_DCT, 0, 1);
 					}
 					else{
 						error(9);
@@ -562,6 +645,7 @@ void block(symTab* table){
 				if(Token == EQU){
 					Token = getToken();
 					if(Token == NUMBER){
+						genCode(OP_LC, 0, Num);
 						Token = getToken();
 						if(Token == COMMA){
 							Token = getToken();
@@ -594,7 +678,7 @@ void block(symTab* table){
 				// Kiểm tra khai báo Ident có hợp lệ không
 				symNode* node = getNodeCurrScope(table, Id);
 				if(node == NULL){
-					node = pushNode(table, Id, VARIABLE, -1);
+					node = pushNode(table, Id, VARIABLE, INT_SIZE);
 				}
 				else{
 					error(24);
@@ -608,7 +692,9 @@ void block(symTab* table){
 						if(Token == RBRACK){
 							Token = getToken();
 							node->size = Num * INT_SIZE;
+							node->arrLen = Num;
 							node->type = ARRAY;
+							genCode(OP_INT, 0, Num*INT_SIZE);
 						}
 						else{
 							error(2);
@@ -621,6 +707,7 @@ void block(symTab* table){
 				else{
 					node->size = INT_SIZE;
 					node->type = INTEGER;
+					genCode(OP_INT, 0, INT_SIZE);
 				}
 
 				if(Token == COMMA){
@@ -646,7 +733,7 @@ void block(symTab* table){
 			// Kiểm tra khai báo Ident có hợp lệ không
 			symNode* nodeProc = getNodeCurrScope(table, Id);
 			if(nodeProc == NULL){
-				nodeProc = pushNode(table, Id, SUBPROC, -1);
+				nodeProc = pushNode(table, Id, SUBPROC, 0);				
 			}
 			else{
 				error(24);
@@ -657,9 +744,12 @@ void block(symTab* table){
 			pushTab(&stack, newTab);
 			nodeProc->subProc = newTab;
 			// printf("\nThêm subProc %s vào bảng %s \n", Id, table->name);
+			// char* copyId = (char*)malloc(MAX_IDENT_LEN);
+			// strcpy(copyId, Id);
 
 			Token = getToken();
 			int num_args = 0;
+			VarType arguments[MAX_ARGUMENTS];
 			if(Token == LPARENT){
 				Token = getToken();
 				while(1){
@@ -707,6 +797,7 @@ void block(symTab* table){
 			if(Token == SEMICOLON){
 				Token = getToken();
 				block(newTab);
+				genCode(OP_EP, 0, 0);
 				if(Token == SEMICOLON){
 					Token = getToken();
 					continue;
@@ -718,6 +809,7 @@ void block(symTab* table){
 			else{
 				error(17);
 			}
+			
 		}
 		else{
 			error(16);
@@ -757,14 +849,16 @@ void program(){
 
 			// Thêm ident vào bảng
 			pushNode(firstTab, Id, PROG, 0);
-
 			Token = getToken();
 			if(Token == SEMICOLON){
 				Token = getToken();
 				block(firstTab);
 
 				if(Token == PERIOD){
+					genCode(OP_HLT, 0, 0);
 					printf("\n\n Thành công !!! \n\n");
+
+					printCode();
 				}
 				else{
 					error(22);

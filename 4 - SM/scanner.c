@@ -110,7 +110,7 @@ TokenType getToken(){
 			ch = getCH();
 			return GEQ;
 		}
-		return GTR;
+		return GRT;
 	}else if(ch == '('){
 		ch = getCH();
 		return LPARENT;

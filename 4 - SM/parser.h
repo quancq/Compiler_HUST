@@ -7,4 +7,5 @@ VarType expression(symTab* table);
 VarType condition(symTab* table);		
 void statement(symTab* table);		
 void block(symTab* table);
-void program();	
+void program();
+void copyArray(VarType* src, VarType* dst, int numElmss);

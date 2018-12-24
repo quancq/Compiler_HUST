@@ -1,0 +1,6 @@
+Program Example;
+Var n;
+Begin
+	n := 5;
+	n := 10 * n;
+End.

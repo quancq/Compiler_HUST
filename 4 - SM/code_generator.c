@@ -116,4 +116,5 @@ void printCode(){
 				break;
 		}
 	}
+	printf("\n");
 }

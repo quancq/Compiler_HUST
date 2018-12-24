@@ -148,5 +148,6 @@ int getScopeDepth(symTab* table, char* name){
 		table = table->parentTab;		// Tìm trong bảng kí hiệu của phạm vi bên ngoài tiếp theo
 		++depth;
 	}
+	printf("\nGetScopeDepth: CurrTable : %s - SearchID: %s", table->name, name);
 	return -1;
 }
